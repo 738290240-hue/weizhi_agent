@@ -36,7 +36,7 @@ public class ChatController {
     private final ObjectMapper objectMapper = new ObjectMapper();
     private final AiSettingsService settingsService;
 
-    @Value("${chat.endpoint:${MINIMAX_REVIEW_ENDPOINT:https://api.minimax.io/v1/chat/completions}}")
+    @Value("${chat.endpoint:${MINIMAX_REVIEW_ENDPOINT:https://api.minimaxi.com/v1/chat/completions}}")
     private String chatEndpoint;
 
     @Value("${app.generated-images-path:generated_images}")
