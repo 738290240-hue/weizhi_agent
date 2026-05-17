@@ -93,6 +93,7 @@ public class AiSettingsService {
         if ("deepseek".equals(provider)) return deepSeekModels();
         return List.of(
                 modelInfo("MiniMax-M2.7", "MiniMax M2.7"),
+                modelInfo("MiniMax-M1", "MiniMax M1"),
                 modelInfo("MiniMax-M2.5", "MiniMax M2.5"),
                 modelInfo("MiniMax-M2.1", "MiniMax M2.1"),
                 modelInfo("MiniMax-M2", "MiniMax M2")

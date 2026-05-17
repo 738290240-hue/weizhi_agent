@@ -4,11 +4,11 @@ spring:
   ai:
     openai:
       api-key: ${MINIMAX_API_KEY}
-      base-url: ${MINIMAX_OPENAI_BASE_URL:https://api.minimax.chat/v1}
+      base-url: ${MINIMAX_OPENAI_BASE_URL:https://api.minimax.io/v1}
       chat:
         options:
           # 锁定你要求的 minimax2.7
-          model: minimax2.7
+          model: MiniMax-M2.7
           temperature: 0.7
           # 关键：在这里声明要激活的函数名，Spring AI 会自动在上下文中寻找名为 generateImage 的 Bean
           functions:

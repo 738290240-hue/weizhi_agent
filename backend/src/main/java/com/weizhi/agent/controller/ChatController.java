@@ -36,7 +36,7 @@ public class ChatController {
     private final ObjectMapper objectMapper = new ObjectMapper();
     private final AiSettingsService settingsService;
 
-    @Value("${chat.endpoint:${MINIMAX_REVIEW_ENDPOINT:https://api.minimax.chat/v1/text/chatcompletion_v2}}")
+    @Value("${chat.endpoint:${MINIMAX_REVIEW_ENDPOINT:https://api.minimax.io/v1/chat/completions}}")
     private String chatEndpoint;
 
     @Value("${app.generated-images-path:generated_images}")
@@ -112,8 +112,7 @@ public class ChatController {
                 if (!response.isSuccessful()) {
                     return "问答失败: " + response.code() + " - " + raw;
                 }
-                JsonNode root = objectMapper.readTree(raw);
-                String content = root.path("choices").path(0).path("message").path("content").asText("");
+                String content = extractMiniMaxContent(objectMapper.readTree(raw));
                 if (content == null || content.isBlank()) {
                     return "模型返回为空，请重试。";
                 }
@@ -122,6 +121,32 @@ public class ChatController {
         } catch (Exception e) {
             return "问答失败: " + e.getMessage();
         }
+    }
+
+    String extractMiniMaxContent(JsonNode root) {
+        String content = root.path("choices").path(0).path("message").path("content").asText("");
+        if (!content.isBlank()) return content;
+
+        content = root.path("choices").path(0).path("delta").path("content").asText("");
+        if (!content.isBlank()) return content;
+
+        content = root.path("reply").asText("");
+        if (!content.isBlank()) return content;
+
+        JsonNode legacyMessages = root.path("choices").path(0).path("messages");
+        if (legacyMessages.isArray()) {
+            StringBuilder builder = new StringBuilder();
+            for (JsonNode message : legacyMessages) {
+                String text = message.path("text").asText("");
+                if (!text.isBlank()) builder.append(text);
+            }
+            if (!builder.isEmpty()) return builder.toString();
+        }
+
+        content = root.path("output_text").asText("");
+        if (!content.isBlank()) return content;
+
+        return root.path("text").asText("");
     }
 
     private boolean looksLikeImageRequest(String input) {
