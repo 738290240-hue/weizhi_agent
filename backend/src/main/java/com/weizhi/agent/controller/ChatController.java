@@ -33,6 +33,7 @@ import java.nio.file.Paths;
 public class ChatController {
     private static final Pattern IMAGE_URL = Pattern.compile("/api/images/files/[A-Za-z0-9._-]+");
     private static final Pattern AUDIO_URL = Pattern.compile("/api/tts/audio/[A-Za-z0-9._-]+");
+    private static final Pattern THINK_BLOCK = Pattern.compile("(?is)<think>.*?</think>");
     private final ObjectMapper objectMapper = new ObjectMapper();
     private final AiSettingsService settingsService;
 
@@ -110,7 +111,7 @@ public class ChatController {
             try (Response response = httpClient.newCall(request).execute()) {
                 String raw = response.body() == null ? "" : response.body().string();
                 if (!response.isSuccessful()) {
-                    return "问答失败: " + response.code() + " - " + raw;
+                    return formatMiniMaxError(response.code(), raw);
                 }
                 String content = extractMiniMaxContent(objectMapper.readTree(raw));
                 if (content == null || content.isBlank()) {
@@ -125,13 +126,13 @@ public class ChatController {
 
     String extractMiniMaxContent(JsonNode root) {
         String content = root.path("choices").path(0).path("message").path("content").asText("");
-        if (!content.isBlank()) return content;
+        if (!content.isBlank()) return cleanAssistantText(content);
 
         content = root.path("choices").path(0).path("delta").path("content").asText("");
-        if (!content.isBlank()) return content;
+        if (!content.isBlank()) return cleanAssistantText(content);
 
         content = root.path("reply").asText("");
-        if (!content.isBlank()) return content;
+        if (!content.isBlank()) return cleanAssistantText(content);
 
         JsonNode legacyMessages = root.path("choices").path(0).path("messages");
         if (legacyMessages.isArray()) {
@@ -140,13 +141,44 @@ public class ChatController {
                 String text = message.path("text").asText("");
                 if (!text.isBlank()) builder.append(text);
             }
-            if (!builder.isEmpty()) return builder.toString();
+            if (!builder.isEmpty()) return cleanAssistantText(builder.toString());
         }
 
         content = root.path("output_text").asText("");
-        if (!content.isBlank()) return content;
+        if (!content.isBlank()) return cleanAssistantText(content);
 
-        return root.path("text").asText("");
+        return cleanAssistantText(root.path("text").asText(""));
+    }
+
+    String cleanAssistantText(String text) {
+        if (text == null) return "";
+        return THINK_BLOCK.matcher(text)
+                .replaceAll("")
+                .replaceAll("(?i)</?think>", "")
+                .trim();
+    }
+
+    String formatMiniMaxError(int statusCode, String raw) {
+        String message = "";
+        String type = "";
+        try {
+            JsonNode error = objectMapper.readTree(raw).path("error");
+            message = error.path("message").asText("");
+            type = error.path("type").asText("");
+        } catch (Exception ignored) {
+            message = raw == null ? "" : raw;
+        }
+
+        if (statusCode == 429 || "rate_limit_error".equals(type)) {
+            return "MiniMax 当前额度不足或触发限流，请稍后再试，或检查账号额度。";
+        }
+        if (statusCode == 401) {
+            return "MiniMax API Key 无效或无权限，请检查中国区 API Key 配置。";
+        }
+        if (message == null || message.isBlank()) {
+            return "MiniMax 请求失败，状态码：" + statusCode;
+        }
+        return "MiniMax 请求失败：" + message;
     }
 
     private boolean looksLikeImageRequest(String input) {

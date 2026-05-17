@@ -51,4 +51,22 @@ public class ChatControllerTest {
                 """));
         assertEquals("legacy reply", content);
     }
+
+    @Test
+    public void testRemovesThinkBlocksFromContent() throws Exception {
+        ChatController controller = new ChatController(settingsService);
+        String content = controller.extractMiniMaxContent(objectMapper.readTree("""
+                {"choices":[{"message":{"content":"<think>hidden reasoning</think>你好！"}}]}
+                """));
+        assertEquals("你好！", content);
+    }
+
+    @Test
+    public void testFormatsRateLimitError() {
+        ChatController controller = new ChatController(settingsService);
+        String message = controller.formatMiniMaxError(429, """
+                {"error":{"type":"rate_limit_error","message":"usage limit exceeded (2056)"}}
+                """);
+        assertEquals("MiniMax 当前额度不足或触发限流，请稍后再试，或检查账号额度。", message);
+    }
 }
