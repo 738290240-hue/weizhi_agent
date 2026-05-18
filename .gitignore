@@ -1,0 +1,28 @@
+.DS_Store
+.env
+backend/.env
+
+# IDE
+.idea/
+
+# Dependencies
+node_modules/
+frontend/node_modules/
+
+# Build outputs
+backend/target/
+frontend/dist/
+desktop/dist/
+dist/
+
+# Local runtime data
+data/
+generated_audio/
+generated_images/
+generated_music/
+logs/
+
+# OS / editor noise
+*.log
+*.tmp
+*.swp

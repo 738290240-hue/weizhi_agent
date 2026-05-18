@@ -1,0 +1,95 @@
+:root {
+  --bg-app: #080808;
+  --bg-sidebar: #0f0f0f;
+  --bg-chat: #080808;
+  --bg-card: #191919;
+  --text-main: #f4f4f4;
+  --text-muted: #8b8b8b;
+  --accent: #3b82f6;
+  --border: #272727;
+  --font-mono: 'JetBrains Mono', 'Fira Code', 'SFMono-Regular', monospace;
+  --font-ui: 'SF Pro Display', 'SF Pro Text', 'Segoe UI', sans-serif;
+}
+
+* { box-sizing: border-box; }
+
+html {
+  background: var(--bg-app);
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-ui);
+  background: var(--bg-app);
+  color: var(--text-main);
+  overflow: hidden;
+}
+
+button, input, textarea, select {
+  font: inherit;
+}
+
+button {
+  transition: border-color 120ms ease, background 120ms ease, color 120ms ease, opacity 120ms ease;
+}
+
+button:focus-visible,
+textarea:focus-visible,
+input:focus-visible,
+select:focus-visible {
+  outline: 2px solid rgba(59, 130, 246, 0.55);
+  outline-offset: 2px;
+}
+
+.app-container {
+  display: grid;
+  grid-template-columns: var(--sidebar-width, 248px) 6px minmax(0, 1fr);
+  height: 100vh;
+  min-width: 860px;
+}
+
+.sidebar {
+  background: var(--bg-sidebar);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  padding: 20px;
+}
+
+.main-content {
+  height: 100vh;
+  min-width: 0;
+}
+
+.log-line {
+  color: #aaddff;
+  margin-bottom: 2px;
+  white-space: pre-wrap;
+  font-family: var(--font-mono);
+  font-size: 11px;
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: #0b0b0b;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #2d2d2d;
+  border: 2px solid #0b0b0b;
+  border-radius: 999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #3c3c3c;
+}
+
+.is-resizing,
+.is-resizing * {
+  cursor: inherit !important;
+  user-select: none !important;
+}

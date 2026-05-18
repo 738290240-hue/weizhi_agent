@@ -1,0 +1,42 @@
+spring:
+  application:
+    name: weizhi-agent
+  ai:
+    openai:
+      api-key: ${MINIMAX_API_KEY}
+      base-url: ${MINIMAX_OPENAI_BASE_URL:https://api.minimax.chat/v1}
+      chat:
+        options:
+          # 锁定你要求的 minimax2.7
+          model: MiniMax-M2.7
+          temperature: 0.7
+          # 关键：在这里声明要激活的函数名，Spring AI 会自动在上下文中寻找名为 generateImage 的 Bean
+          functions:
+            - generateImage
+            - ttsSynthesize
+            - listVoices
+
+server:
+  port: 3007
+
+minimax:
+  endpoint: https://api.minimax.chat/v1
+  image-generation-endpoint: ${minimax.endpoint}/image_generation
+  tts-endpoint: ${minimax.endpoint}/t2a_v2
+
+deepseek:
+  api-key: ${DEEPSEEK_API_KEY:}
+  base-url: ${DEEPSEEK_BASE_URL:https://api.deepseek.com}
+  model: ${DEEPSEEK_MODEL:deepseek-v4-flash}
+
+settings:
+  file: data/ai-settings.json
+
+app:
+  generated-images-path: generated_images
+
+storage:
+  image-dir: ${app.generated-images-path:generated_images}
+  audio-dir: generated_audio
+  image-history-file: data/image-history.json
+  tts-history-file: data/tts-history.json
